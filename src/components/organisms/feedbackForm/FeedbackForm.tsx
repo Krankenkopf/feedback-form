@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { FormEvent, useState } from 'react';
 
+import { formAPI } from '@api/form';
 import { Button } from '@components/atoms';
 import {
   CalendarIcon,
@@ -15,6 +16,7 @@ import { MaskField } from '@components/molecules/maskField/MaskField';
 import { TextareaField } from '@components/molecules/textareaField/TextareaField';
 import { TextField } from '@components/molecules/textField/TextField';
 import { Nullable } from '@types';
+import { getKeys } from '@utils';
 
 import styles from './FeedbackForm.module.scss';
 
@@ -125,6 +127,52 @@ export const FeedbackForm = () => {
     }
   };
 
+  const onSubmit = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const formDataObject = {} as Record<FieldName, string>;
+    const forcedDirtyFields = {} as Record<FieldName, true | undefined>;
+    const forcedFieldErrors = {} as Record<FieldName, FieldError>;
+
+    let isAllFilled = true;
+
+    formData.forEach((value: string, key: FieldName) => {
+      formDataObject[key] = value;
+      if (!value) {
+        forcedDirtyFields[key] = true;
+        forcedFieldErrors[key] = FieldError.REQUIRED;
+        isAllFilled = false;
+      }
+    });
+
+    const hasNoError = !getKeys(formDataObject).some(key => validators[key](formDataObject[key]));
+
+    formMessage && setFormMessage(null);
+    if (!isAllFilled) {
+      setDirtyFields({ ...dirtyFields, ...forcedDirtyFields });
+      setErrors({ ...errors, ...forcedFieldErrors });
+      setFormError(FormMessage.REQUIRED);
+      return;
+    }
+    if (!hasNoError) {
+      setFormError(FormMessage.INVALID_FIELD);
+      return;
+    }
+
+    formError && setFormError(null);
+
+    setIsSending(true);
+    const request = formAPI.sendFeedback(formData);
+    request
+      .then(res => {
+        setFormMessage(res.message);
+        setValues(initialValues);
+        setDirtyFields({});
+      })
+      .catch(err => setFormError(err.message))
+      .finally(() => setIsSending(false));
+  };
+
   const getFieldError = (name: FieldName) => dirtyFields[name] && (errors[name] ?? undefined);
   const getFieldSuccess = (name: FieldName) => dirtyFields[name] && (!errors[name] || undefined);
 
@@ -136,7 +184,7 @@ export const FeedbackForm = () => {
   );
 
   return (
-    <form className={styles['form']}>
+    <form className={styles['form']} onSubmit={onSubmit}>
       <TextField
         label="Name"
         name={FieldName.NAME}
