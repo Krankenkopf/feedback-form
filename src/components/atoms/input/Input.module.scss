@@ -1,0 +1,13 @@
+.input {
+    position: relative;
+    max-width: 400px;
+    background-color: #fff0;
+    outline: none;  
+}
+.input[type="password"]:not([value=""]) {
+    //font: large Verdana,sans-serif;
+    //text-indent: 1px;
+    //letter-spacing: 1px;
+    //font-weight: bold;
+    //-webkit-text-stroke: 4px #292825;   
+}
