@@ -1,0 +1,14 @@
+.container {
+  position: relative;
+}
+
+.symbols-info {
+  position: absolute;
+  bottom: 1px;
+  right: 1px;
+  font-size: 0.7em;
+
+  &._limit {
+    color: var(--error-color);
+  }
+}
