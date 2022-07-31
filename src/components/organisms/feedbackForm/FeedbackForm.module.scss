@@ -1,0 +1,18 @@
+.form {
+  &>* {
+    margin-bottom: 5px;
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+  &__error, &__message {
+    padding-top: 0.2em;
+    font-size: calc(1em / 1.2);
+    font-weight: bold;
+    text-align: center;
+    color: var(--error-color);
+  }
+  &__message {
+    color: var(--success-color);
+  }
+}
